@@ -34,9 +34,17 @@ public class cashFlow extends javax.swing.JPanel {
 
             },
             new String [] {
-                "ID", "Revenue", "Expenses", "Profit"
+                "Date", "Description", "Cash Inflow", "Cash Outflow", " Net Cash Flow "
             }
-        ));
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
         jTable3.getTableHeader().setReorderingAllowed(false);
         jScrollPane5.setViewportView(jTable3);
 

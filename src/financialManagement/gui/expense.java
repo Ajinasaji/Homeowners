@@ -8,12 +8,12 @@ package financialManagement.gui;
  *
  * @author User
  */
-public class incomeStatement extends javax.swing.JPanel {
+public class expense extends javax.swing.JPanel {
 
     /**
-     * Creates new form incomeStatement
+     * Creates new form expense
      */
-    public incomeStatement() {
+    public expense() {
         initComponents();
     }
 
@@ -34,9 +34,17 @@ public class incomeStatement extends javax.swing.JPanel {
 
             },
             new String [] {
-                "Revenue", "Expenses", "Profit"
+                "Date", "Description", "Amount", "Category"
             }
-        ));
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
         jTable3.getTableHeader().setReorderingAllowed(false);
         jScrollPane5.setViewportView(jTable3);
 
