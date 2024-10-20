@@ -13,15 +13,19 @@ import java.awt.Desktop;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.ResultSet;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import javax.swing.JFileChooser;
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Vector;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -43,8 +47,7 @@ public class Accounting extends javax.swing.JFrame {
     private static HashMap<String, String> transactionTypeMap = new HashMap<>();
     private static HashMap<String, String> transactionCategoryMap = new HashMap<>();
     private static HashMap<String, String> paymentMethodMap = new HashMap<>();
-    private static HashMap<String, String> budgetCategoryMap = new HashMap<>();
-    private static HashMap<String, String> budgetPeriodMap = new HashMap<>();
+    private static HashMap<String, Integer> budgetCategoryMap = new HashMap<>();
 
     private void responsive() {
         setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -234,8 +237,7 @@ public class Accounting extends javax.swing.JFrame {
     private void loadBudgets() {
         try {
             ResultSet resultSet = MySQL2.executeSearch("SELECT * FROM `homeowners`.budget_entries INNER JOIN `category` \n"
-                    + "ON `budget_entries`.category_id = `category`.id\n"
-                    + "INNER JOIN `period` ON `budget_entries`.period_id = `period`.id");
+                    + "ON `budget_entries`.category_id = `category`.id");
 
             DefaultTableModel model = (DefaultTableModel) jTable2.getModel();
             model.setRowCount(0);
@@ -245,8 +247,9 @@ public class Accounting extends javax.swing.JFrame {
                 vector.add(resultSet.getString("id"));
                 vector.add(resultSet.getString("category"));
                 vector.add(resultSet.getString("amount"));
-                vector.add(resultSet.getString("period"));
                 vector.add(resultSet.getString("description"));
+                vector.add(resultSet.getString("start_date"));
+                vector.add(resultSet.getString("end_date"));
                 vector.add(resultSet.getString("status"));
 
                 model.addRow(vector);
@@ -265,30 +268,11 @@ public class Accounting extends javax.swing.JFrame {
 
             while (resultSet.next()) {
                 vector.add(resultSet.getString("category"));
-                budgetCategoryMap.put(resultSet.getString("category"), resultSet.getString("id"));
+                budgetCategoryMap.put(resultSet.getString("category"), resultSet.getInt("id"));
             }
 
             DefaultComboBoxModel model = new DefaultComboBoxModel(vector);
             jComboBox6.setModel(model);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void loadBudgetPeriod() {
-        try {
-            ResultSet resultSet = MySQL2.executeSearch("SELECT * FROM `homeowners`.period");
-            Vector<String> vector = new Vector();
-            vector.add("Select");
-
-            while (resultSet.next()) {
-                vector.add(resultSet.getString("period"));
-                budgetPeriodMap.put(resultSet.getString("period"), resultSet.getString("id"));
-            }
-
-            DefaultComboBoxModel model = new DefaultComboBoxModel(vector);
-            jComboBox9.setModel(model);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -334,7 +318,6 @@ public class Accounting extends javax.swing.JFrame {
         loadPaymentMethod();
         generateReferenceNumber();
         loadBudgetCategory();
-        loadBudgetPeriod();
         loadBudgets();
         loadBarCharts();
         loadPieCharts();
@@ -407,13 +390,15 @@ public class Accounting extends javax.swing.JFrame {
         jLabel19 = new javax.swing.JLabel();
         jFormattedTextField3 = new javax.swing.JFormattedTextField();
         jLabel20 = new javax.swing.JLabel();
-        jComboBox9 = new javax.swing.JComboBox<>();
         jLabel21 = new javax.swing.JLabel();
         jScrollPane4 = new javax.swing.JScrollPane();
         jTextArea2 = new javax.swing.JTextArea();
         jButton8 = new javax.swing.JButton();
         jButton9 = new javax.swing.JButton();
         jLabel14 = new javax.swing.JLabel();
+        jDateChooser14 = new com.toedter.calendar.JDateChooser();
+        jLabel46 = new javax.swing.JLabel();
+        jDateChooser15 = new com.toedter.calendar.JDateChooser();
         jPanel6 = new javax.swing.JPanel();
         jButton5 = new javax.swing.JButton();
         jLabel18 = new javax.swing.JLabel();
@@ -902,7 +887,7 @@ public class Accounting extends javax.swing.JFrame {
 
         jLabel20.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         jLabel20.setForeground(new java.awt.Color(0, 0, 0));
-        jLabel20.setText("Period");
+        jLabel20.setText("Start Date");
 
         jLabel21.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         jLabel21.setForeground(new java.awt.Color(0, 0, 0));
@@ -936,6 +921,10 @@ public class Accounting extends javax.swing.JFrame {
         jLabel14.setForeground(new java.awt.Color(0, 0, 0));
         jLabel14.setText("Budget");
 
+        jLabel46.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        jLabel46.setForeground(new java.awt.Color(0, 0, 0));
+        jLabel46.setText("End Date");
+
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
         jPanel5Layout.setHorizontalGroup(
@@ -943,27 +932,27 @@ public class Accounting extends javax.swing.JFrame {
             .addGroup(jPanel5Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel5Layout.createSequentialGroup()
-                        .addComponent(jLabel21)
-                        .addGap(0, 0, Short.MAX_VALUE))
                     .addComponent(jLabel14, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel5Layout.createSequentialGroup()
                         .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane4)
+                            .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 266, Short.MAX_VALUE)
+                            .addComponent(jButton9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jButton7, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jButton6, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jButton8, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(jPanel5Layout.createSequentialGroup()
                                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLabel16)
                                     .addComponent(jLabel19)
-                                    .addComponent(jLabel20))
-                                .addGap(44, 44, 44)
+                                    .addComponent(jLabel20)
+                                    .addComponent(jLabel21)
+                                    .addComponent(jLabel46))
+                                .addGap(32, 32, 32)
                                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jComboBox6, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addComponent(jFormattedTextField3)
-                                    .addComponent(jComboBox9, 0, 159, Short.MAX_VALUE)))
-                            .addComponent(jButton7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jButton9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jButton6, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jButton8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                    .addComponent(jDateChooser14, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jDateChooser15, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                         .addContainerGap())))
         );
         jPanel5Layout.setVerticalGroup(
@@ -982,20 +971,24 @@ public class Accounting extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel20)
-                    .addComponent(jComboBox9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jDateChooser14, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jLabel21)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(24, 24, 24)
-                .addComponent(jButton8)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel46)
+                    .addComponent(jDateChooser15, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
+                .addComponent(jLabel21)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jButton8)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jButton6)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jButton9)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jButton7)
-                .addContainerGap(166, Short.MAX_VALUE))
+                .addContainerGap(147, Short.MAX_VALUE))
         );
 
         jPanel6.setBackground(new java.awt.Color(255, 255, 255));
@@ -1058,11 +1051,11 @@ public class Accounting extends javax.swing.JFrame {
 
             },
             new String [] {
-                "ID", "Category", " Amount", "Period", "Description", "Status"
+                "ID", "Category", " Amount", "Description", "Start Date", "End Date", "Status"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false
+                false, false, false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -1078,8 +1071,8 @@ public class Accounting extends javax.swing.JFrame {
         jScrollPane3.setViewportView(jTable2);
         if (jTable2.getColumnModel().getColumnCount() > 0) {
             jTable2.getColumnModel().getColumn(0).setResizable(false);
-            jTable2.getColumnModel().getColumn(4).setResizable(false);
-            jTable2.getColumnModel().getColumn(5).setResizable(false);
+            jTable2.getColumnModel().getColumn(3).setResizable(false);
+            jTable2.getColumnModel().getColumn(6).setResizable(false);
         }
 
         jPanel7.add(jScrollPane3, java.awt.BorderLayout.CENTER);
@@ -1130,7 +1123,7 @@ public class Accounting extends javax.swing.JFrame {
                         .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, 210, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .addGap(30, 30, 30))
+                .addGap(21, 21, 21))
         );
 
         jTabbedPane1.addTab("Budgeting", jPanel13);
@@ -2173,11 +2166,10 @@ public class Accounting extends javax.swing.JFrame {
 
                 String category = String.valueOf(jComboBox6.getSelectedItem());
                 String amount = jFormattedTextField3.getText();
-                String period = String.valueOf(jComboBox9.getSelectedItem());
                 String description = jTextArea2.getText();
 
                 MySQL2.executeIUD("UPDATE `homeowners`.budget_entries SET \n"
-                        + "`budget_category_id` = '" + budgetCategoryMap.get(category) + "', `amount` = '" + amount + "', `period_id` = '" + budgetPeriodMap.get(period) + "', `description` = '" + description + "', `status` = 'Active'\n"
+                        + "`category_id` = '" + budgetCategoryMap.get(category) + "', `amount` = '" + amount + "', `description` = '" + description + "', `status` = 'Active'\n"
                         + "WHERE `id`='" + selectedRow + "'");
 
                 loadBudgets();
@@ -2207,26 +2199,33 @@ public class Accounting extends javax.swing.JFrame {
         try {
             String category = String.valueOf(jComboBox6.getSelectedItem());
             String amount = jFormattedTextField3.getText();
-            String period = String.valueOf(jComboBox9.getSelectedItem());
             String description = jTextArea2.getText();
+            Date startDate = jDateChooser14.getDate(); // Start date picker
+            Date endDate = jDateChooser15.getDate(); // End date picker
 
-            if (category == "Select" || category.isEmpty()) {
+            if (category.equals("Select") || category.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Please select a category.");
             } else if (amount == null || amount.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Please enter an amount.");
             } else {
                 try {
                     Double.parseDouble(amount);
-                    if (period == "Select" || period.isEmpty()) {
-                        JOptionPane.showMessageDialog(this, "Please select a period.");
+                    if (startDate == null) {
+                        JOptionPane.showMessageDialog(this, "Please select a start date.");
+                    } else if (endDate == null) {
+                        JOptionPane.showMessageDialog(this, "Please select an end date.");
+                    } else if (endDate.before(startDate)) {
+                        JOptionPane.showMessageDialog(this, "End date cannot be before start date.");
                     } else if (description == null || description.isEmpty()) {
                         JOptionPane.showMessageDialog(this, "Please enter a description.");
                     } else {
                         // If all validations pass, execute the insert statement
-                        MySQL2.executeIUD("INSERT INTO homeowners.budget_entries (`budget_category_id`,`amount`,`period_id`,`description`,`status`)"
-                                + " VALUES ('" + budgetCategoryMap.get(category) + "','" + amount + "','" + budgetPeriodMap.get(period) + "','" + description + "','Active')"
-                        );
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                        String startDateStr = dateFormat.format(startDate);
+                        String endDateStr = dateFormat.format(endDate);
 
+                        MySQL2.executeIUD("INSERT INTO homeowners.budget_entries (category_id, amount, description, status, start_date, end_date) "
+                                + "VALUES ('" + budgetCategoryMap.get(category) + "', '" + amount + "', '" + description + "', 'Active', '" + startDateStr + "', '" + endDateStr + "')");
                         loadBudgets();
                         clearBudgetEntries();
                     }
@@ -2248,13 +2247,13 @@ public class Accounting extends javax.swing.JFrame {
         } else {
 
             try {
-                int row  = jTable2.getSelectedRow();
+                int row = jTable2.getSelectedRow();
                 String SelectedRow = String.valueOf(jTable2.getValueAt(row, 0));
-                
-                MySQL2.executeIUD("DELETE FROM `homeowners`.budget_entries WHERE `id` = '"+SelectedRow+"'");
+
+                MySQL2.executeIUD("DELETE FROM `homeowners`.budget_entries WHERE `id` = '" + SelectedRow + "'");
                 loadBudgets();
                 clearBudgetEntries();
-                
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -2354,17 +2353,36 @@ public class Accounting extends javax.swing.JFrame {
     private void jTable2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable2MouseClicked
         // Select Row (Budget)
         int row = jTable2.getSelectedRow();
+        if (row == -1) {
+            // Handle the case where no row is selected
+            return;
+        }
 
-        String category = String.valueOf(jTable2.getValueAt(row, 1));
-        String amount = String.valueOf(jTable2.getValueAt(row, 2));
-        String period = String.valueOf(jTable2.getValueAt(row, 3));
-        String description = String.valueOf(jTable2.getValueAt(row, 4));
+        String category = jTable2.getValueAt(row, 1) != null ? String.valueOf(jTable2.getValueAt(row, 1)) : "";
+        String amount = jTable2.getValueAt(row, 2) != null ? String.valueOf(jTable2.getValueAt(row, 2)) : "";
+        String description = jTable2.getValueAt(row, 3) != null ? String.valueOf(jTable2.getValueAt(row, 3)) : "";
+        String startDate = jTable2.getValueAt(row, 4) != null ? String.valueOf(jTable2.getValueAt(row, 4)) : "";
+        String endDate = jTable2.getValueAt(row, 5) != null ? String.valueOf(jTable2.getValueAt(row, 5)) : "";
 
         jComboBox6.setSelectedItem(category);
         jFormattedTextField3.setText(amount);
-        jComboBox9.setSelectedItem(period);
         jTextArea2.setText(description);
+
+        // Parse dates and set them in date choosers
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            Date start = dateFormat.parse(startDate);
+            Date end = dateFormat.parse(endDate);
+            jDateChooser14.setDate(start);
+            jDateChooser15.setDate(end);
+        } catch (ParseException e) {
+            e.printStackTrace(); // Handle the exception appropriately
+        }
+
+        // Disable components
         jButton8.setEnabled(false);
+        jComboBox6.setEnabled(false);
+        jDateChooser14.setEnabled(false);
     }//GEN-LAST:event_jTable2MouseClicked
 
     /**
@@ -2430,12 +2448,13 @@ public class Accounting extends javax.swing.JFrame {
     private javax.swing.JComboBox<String> jComboBox6;
     private javax.swing.JComboBox<String> jComboBox7;
     private javax.swing.JComboBox<String> jComboBox8;
-    private javax.swing.JComboBox<String> jComboBox9;
     private com.toedter.calendar.JDateChooser jDateChooser1;
     private com.toedter.calendar.JDateChooser jDateChooser10;
     private com.toedter.calendar.JDateChooser jDateChooser11;
     private com.toedter.calendar.JDateChooser jDateChooser12;
     private com.toedter.calendar.JDateChooser jDateChooser13;
+    private com.toedter.calendar.JDateChooser jDateChooser14;
+    private com.toedter.calendar.JDateChooser jDateChooser15;
     private com.toedter.calendar.JDateChooser jDateChooser2;
     private com.toedter.calendar.JDateChooser jDateChooser3;
     private com.toedter.calendar.JDateChooser jDateChooser4;
@@ -2486,6 +2505,7 @@ public class Accounting extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel43;
     private javax.swing.JLabel jLabel44;
     private javax.swing.JLabel jLabel45;
+    private javax.swing.JLabel jLabel46;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
@@ -2570,10 +2590,13 @@ public class Accounting extends javax.swing.JFrame {
 
     private void clearBudgetEntries() {
         jComboBox6.setSelectedIndex(0);
-        jComboBox9.setSelectedIndex(0);
         jFormattedTextField3.setText("");
         jTextArea2.setText("");
         jButton8.setEnabled(true);
+        jComboBox6.setEnabled(true);
+        jDateChooser14.setDate(null);
+        jDateChooser15.setDate(null);
+        jDateChooser14.setEnabled(true);
         jTable2.setSelectionMode(0);
     }
 }
