@@ -1,11 +1,8 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package financialManagement.gui;
 
 import com.formdev.flatlaf.intellijthemes.FlatArcOrangeIJTheme;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
+import java.awt.CardLayout;
 import java.sql.ResultSet;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -26,7 +23,7 @@ public class CustomerProfile extends javax.swing.JFrame {
 
     private static HashMap<String, String> productMap = new HashMap<>();
     private static HashMap<String, String> StatusMap = new HashMap<>();
-     private static HashMap<String, String> OrderStatusMap = new HashMap<>();
+    private static HashMap<String, String> OrderStatusMap = new HashMap<>();
 
     /**
      * Creates new form Accounting
@@ -62,8 +59,8 @@ public class CustomerProfile extends javax.swing.JFrame {
             e.printStackTrace();
         }
     }
-    
-     private void loadOrderStatus() {
+
+    private void loadOrderStatus() {
 
         try {
 
@@ -84,7 +81,6 @@ public class CustomerProfile extends javax.swing.JFrame {
             e.printStackTrace();
         }
     }
-    
 
     private void loadStatus() {
 
@@ -117,8 +113,14 @@ public class CustomerProfile extends javax.swing.JFrame {
 
             DefaultTableModel model = (DefaultTableModel) jTable3.getModel();
             DefaultTableModel model1 = (DefaultTableModel) jTable1.getModel();
+            
             model.setRowCount(0);
             model1.setRowCount(0);
+            
+            DefaultTableModel model2 = (DefaultTableModel) CustomerTable.getModel();
+            model2.setRowCount(0);
+            
+            int customercount = 0;
 
             while (resultSet.next()) {
 
@@ -131,8 +133,14 @@ public class CustomerProfile extends javax.swing.JFrame {
 
                 model.addRow(vector);
                 model1.addRow(vector);
+                model2.addRow(vector);
+                
+                customercount++;
 
             }
+            
+            jButton2C.setText(jButton2C.getText()+ "("+customercount+")" );
+            
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -150,6 +158,11 @@ public class CustomerProfile extends javax.swing.JFrame {
 
             DefaultTableModel model = (DefaultTableModel) jTable4.getModel();
             model.setRowCount(0);
+            
+            DefaultTableModel model2 = (DefaultTableModel) OrderTable.getModel();
+            model2.setRowCount(0);
+            
+             int ordercount = 0;
 
             while (resultSet.next()) {
 
@@ -161,11 +174,14 @@ public class CustomerProfile extends javax.swing.JFrame {
                 vector.add(resultSet.getString("customer_mobile"));
                 vector.add(resultSet.getString("order_status"));
 
-                
-
                 model.addRow(vector);
+                model2.addRow(vector);
 
+                ordercount++;
+                
             }
+            
+            jButton1O.setText(jButton1O.getText()+ "("+ordercount+")" );
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -181,7 +197,18 @@ public class CustomerProfile extends javax.swing.JFrame {
         jLabel22 = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
         jTabbedPane1 = new javax.swing.JTabbedPane();
-        jPanel2 = new javax.swing.JPanel();
+        Admin = new javax.swing.JPanel();
+        Background = new javax.swing.JPanel();
+        jPanel14 = new javax.swing.JPanel();
+        jButton1O = new javax.swing.JButton();
+        jButton2C = new javax.swing.JButton();
+        viewPanel = new javax.swing.JPanel();
+        CustomerPenal = new javax.swing.JPanel();
+        jScrollPane5 = new javax.swing.JScrollPane();
+        CustomerTable = new javax.swing.JTable();
+        OrderPenal = new javax.swing.JPanel();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        OrderTable = new javax.swing.JTable();
         jPanel15 = new javax.swing.JPanel();
         jPanel12 = new javax.swing.JPanel();
         jPanel16 = new javax.swing.JPanel();
@@ -261,20 +288,171 @@ public class CustomerProfile extends javax.swing.JFrame {
 
         jPanel1.setLayout(new java.awt.BorderLayout());
 
-        jPanel2.setBackground(new java.awt.Color(0, 51, 255));
+        Admin.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                AdminKeyPressed(evt);
+            }
+        });
 
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1273, Short.MAX_VALUE)
+        Background.setBackground(new java.awt.Color(245, 245, 245));
+
+        jPanel14.setBackground(new java.awt.Color(102, 102, 102));
+
+        jButton1O.setBackground(new java.awt.Color(255, 102, 0));
+        jButton1O.setFont(new java.awt.Font("Segoe UI Black", 1, 36)); // NOI18N
+        jButton1O.setText("Order Datails");
+        jButton1O.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1OActionPerformed(evt);
+            }
+        });
+
+        jButton2C.setBackground(new java.awt.Color(255, 102, 0));
+        jButton2C.setFont(new java.awt.Font("Segoe UI Black", 1, 36)); // NOI18N
+        jButton2C.setText("Customer Datails");
+        jButton2C.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2CActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel14Layout = new javax.swing.GroupLayout(jPanel14);
+        jPanel14.setLayout(jPanel14Layout);
+        jPanel14Layout.setHorizontalGroup(
+            jPanel14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel14Layout.createSequentialGroup()
+                .addGap(41, 41, 41)
+                .addComponent(jButton2C, javax.swing.GroupLayout.PREFERRED_SIZE, 526, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jButton1O, javax.swing.GroupLayout.PREFERRED_SIZE, 526, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(52, 52, 52))
         );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 626, Short.MAX_VALUE)
+        jPanel14Layout.setVerticalGroup(
+            jPanel14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel14Layout.createSequentialGroup()
+                .addContainerGap(22, Short.MAX_VALUE)
+                .addGroup(jPanel14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton1O, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton2C, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(19, 19, 19))
         );
 
-        jTabbedPane1.addTab("Main", jPanel2);
+        viewPanel.setLayout(new java.awt.CardLayout());
+
+        CustomerTable.setBackground(new java.awt.Color(153, 153, 153));
+        CustomerTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "First Name", "Last Name", "Email", "Mobile", "Status"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        CustomerTable.getTableHeader().setReorderingAllowed(false);
+        CustomerTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                CustomerTableMouseClicked(evt);
+            }
+        });
+        jScrollPane5.setViewportView(CustomerTable);
+
+        javax.swing.GroupLayout CustomerPenalLayout = new javax.swing.GroupLayout(CustomerPenal);
+        CustomerPenal.setLayout(CustomerPenalLayout);
+        CustomerPenalLayout.setHorizontalGroup(
+            CustomerPenalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 1261, Short.MAX_VALUE)
+        );
+        CustomerPenalLayout.setVerticalGroup(
+            CustomerPenalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, CustomerPenalLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 463, Short.MAX_VALUE))
+        );
+
+        viewPanel.add(CustomerPenal, "customerCard");
+
+        OrderTable.setBackground(new java.awt.Color(153, 153, 153));
+        OrderTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Product_Name", "Quantity", "Order_Date", "Arried_Data", "Customer_Mobile", "Status"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        OrderTable.getTableHeader().setReorderingAllowed(false);
+        jScrollPane3.setViewportView(OrderTable);
+
+        javax.swing.GroupLayout OrderPenalLayout = new javax.swing.GroupLayout(OrderPenal);
+        OrderPenal.setLayout(OrderPenalLayout);
+        OrderPenalLayout.setHorizontalGroup(
+            OrderPenalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(OrderPenalLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 1249, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        OrderPenalLayout.setVerticalGroup(
+            OrderPenalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(OrderPenalLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 458, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        viewPanel.add(OrderPenal, "orderCard");
+
+        javax.swing.GroupLayout BackgroundLayout = new javax.swing.GroupLayout(Background);
+        Background.setLayout(BackgroundLayout);
+        BackgroundLayout.setHorizontalGroup(
+            BackgroundLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(BackgroundLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(BackgroundLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel14, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(viewPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        BackgroundLayout.setVerticalGroup(
+            BackgroundLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(BackgroundLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jPanel14, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(viewPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 469, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        javax.swing.GroupLayout AdminLayout = new javax.swing.GroupLayout(Admin);
+        Admin.setLayout(AdminLayout);
+        AdminLayout.setHorizontalGroup(
+            AdminLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(Background, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        AdminLayout.setVerticalGroup(
+            AdminLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(AdminLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(Background, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jTabbedPane1.addTab("Admin DashBoard", Admin);
 
         jPanel12.setBackground(new java.awt.Color(204, 204, 204));
 
@@ -910,9 +1088,9 @@ public class CustomerProfile extends javax.swing.JFrame {
         // Load Oraders
 
         try {
-            
+
             jComboBox3.setEnabled(true);
-            
+
             int row = jTable4.getSelectedRow();
 
             String Product = String.valueOf(jTable4.getValueAt(row, 0));
@@ -1028,7 +1206,7 @@ public class CustomerProfile extends javax.swing.JFrame {
                             + "VALUES('" + qty + "','" + odate + "','" + adate + "','" + Cmobile + "','" + productMap.get(Product) + "','2') ");
 
                 }
-                
+
                 loadorders();
 
             }
@@ -1055,10 +1233,10 @@ public class CustomerProfile extends javax.swing.JFrame {
         String Mobile = String.valueOf(jTable1.getValueAt(row, 3));
         jFormattedTextField4.setText(Mobile);
         jFormattedTextField4.setEditable(false);
-        
+
         String Status = String.valueOf(jTable1.getValueAt(row, 4));
         jComboBox1.setSelectedItem(Status);
-        
+
     }//GEN-LAST:event_jTable1MouseClicked
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
@@ -1154,7 +1332,7 @@ public class CustomerProfile extends javax.swing.JFrame {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             String odate = Orderdate != null ? sdf.format(Orderdate) : "";
             String adate = arriedate != null ? sdf.format(arriedate) : "";
-            String Status = String.valueOf(jComboBox1.getSelectedItem());
+            String Status = String.valueOf(jComboBox3.getSelectedIndex());
 
             if (Product.equals("Select")) {
                 JOptionPane.showMessageDialog(this, "Please select a Product", "Warning", JOptionPane.WARNING_MESSAGE);
@@ -1168,12 +1346,14 @@ public class CustomerProfile extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(this, "Please enter your mobile", "Warning", JOptionPane.WARNING_MESSAGE);
             } else if (!Cmobile.matches("^07[01245678]{1}[0-9]{7}$")) {
                 JOptionPane.showMessageDialog(this, "Please enter valid mobile", "Warning", JOptionPane.WARNING_MESSAGE);
-            } else if (Status.matches("Select")) {
+            } else if (Status == "0") {
                 JOptionPane.showMessageDialog(this, "Please Select Status ", "Warning", JOptionPane.WARNING_MESSAGE);
-            }else {
+            } else {
 
-                MYSQL1.executeIUD("UPDATE `order`  INNER JOIN `product` ON `order`.`product_id`=  `product`.`id` SET `qty`='" + qty + "',`order_date`='" + odate + "',`arried_date`='" + adate + "' ,`status`='"+Status+"' "
-                    + " WHERE `customer_mobile`='" + Cmobile + "'  ");
+                MYSQL1.executeIUD("UPDATE `order` SET `qty`='" + qty + "',`order_date`='" + odate + "',`arried_date`='" + adate + "' ,`order_status_id`=' " + Status + " ' "
+                        + " WHERE `customer_mobile`='" + Cmobile + "'  ");
+
+                System.out.println(Status);
 
                 loadorders();
 
@@ -1185,10 +1365,31 @@ public class CustomerProfile extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton8ActionPerformed
 
     private void jButton9ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton9ActionPerformed
-        
+
         reset();
-        
+
     }//GEN-LAST:event_jButton9ActionPerformed
+
+    private void AdminKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_AdminKeyPressed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_AdminKeyPressed
+
+    private void CustomerTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_CustomerTableMouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_CustomerTableMouseClicked
+
+    private void jButton2CActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2CActionPerformed
+
+        CardLayout view = (CardLayout) (viewPanel.getLayout());
+        view.show(viewPanel, "customerCard");
+
+
+    }//GEN-LAST:event_jButton2CActionPerformed
+
+    private void jButton1OActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1OActionPerformed
+        CardLayout view = (CardLayout) (viewPanel.getLayout());
+        view.show(viewPanel, "orderCard");
+    }//GEN-LAST:event_jButton1OActionPerformed
 
     /**
      * @param args the command line arguments
@@ -1206,6 +1407,14 @@ public class CustomerProfile extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JPanel Admin;
+    private javax.swing.JPanel Background;
+    private javax.swing.JPanel CustomerPenal;
+    private javax.swing.JTable CustomerTable;
+    private javax.swing.JPanel OrderPenal;
+    private javax.swing.JTable OrderTable;
+    private javax.swing.JButton jButton1O;
+    private javax.swing.JButton jButton2C;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton6;
     private javax.swing.JButton jButton7;
@@ -1250,10 +1459,10 @@ public class CustomerProfile extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel10;
     private javax.swing.JPanel jPanel12;
     private javax.swing.JPanel jPanel13;
+    private javax.swing.JPanel jPanel14;
     private javax.swing.JPanel jPanel15;
     private javax.swing.JPanel jPanel16;
     private javax.swing.JPanel jPanel17;
-    private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel20;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
@@ -1263,7 +1472,9 @@ public class CustomerProfile extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel9;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JTable jTable1;
     private javax.swing.JTable jTable3;
@@ -1272,6 +1483,7 @@ public class CustomerProfile extends javax.swing.JFrame {
     private javax.swing.JTextField jTextField3;
     private rojerusan.RSPanelImage rSPanelImage1;
     private rojerusan.RSPanelImage rSPanelImage2;
+    private javax.swing.JPanel viewPanel;
     // End of variables declaration//GEN-END:variables
 
     private void reset() {
@@ -1288,7 +1500,6 @@ public class CustomerProfile extends javax.swing.JFrame {
         jTextField3.setEditable(true);
         jComboBox3.setSelectedIndex(0);
         jComboBox3.setEditable(false);
-        
 
     }
 }
